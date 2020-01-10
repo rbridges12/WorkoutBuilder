@@ -10,12 +10,13 @@ class Workout:
 
 
     def __init__(self, file_name: str, description: str, units: str = 'english', time_unit: str = 'minutes',
-                 ftp_unit: str = 'percent'):
+                 ftp_unit: str = 'percent', rest_ftp : int = 30):
         self.units = units
         self.description = description
         self.file_name = file_name
         self.time_unit = time_unit
         self.ftp_unit = ftp_unit
+        self.default_rest_ftp = rest_ftp
 
         self.file_extension = '.mrc'
         self.VERSION = 2
@@ -39,20 +40,28 @@ class Workout:
 
     # add a block of intervals, for each rep there will be an effort interval and a rest interval
     def add_interval_block(self, reps : int, effort_duration : float, effort_start_ftp : float, rest_duration : float,
-                           rest_start_ftp : float, effort_end_ftp : float = None, rest_end_ftp : float = None):
+                           rest_start_ftp : float = None, effort_end_ftp : float = None, rest_end_ftp : float = None):
+
+        # if no rest_ftp is specified, make it the default
+        if rest_start_ftp is None: rest_start_ftp = self.default_rest_ftp
+
         # add all reps but the last one
         for i in range(reps -1):
             self.add_interval(effort_duration, effort_start_ftp, effort_end_ftp)
             self.add_interval(rest_duration, rest_start_ftp, rest_end_ftp)
+
         # add the last rep with no rest, as it is the end of the set
         self.add_interval(effort_duration, effort_start_ftp, effort_end_ftp)
 
 
 
     # add a set of interval blocks, with longer rests between each set
-    def add_interval_set(self, sets : int, long_rest_duration : int, rest_ftp : int, reps : int, effort_duration :
-    float, effort_start_ftp : float, rest_duration : float, rest_start_ftp : float, effort_end_ftp : float = None, rest_end_ftp : float = None):
+    def add_interval_set(self, sets : int, long_rest_duration : int, reps : int, effort_duration :
+    float, effort_start_ftp : float, rest_duration : float, rest_ftp : float = None, rest_start_ftp : float = None,
+                         effort_end_ftp : float = None, rest_end_ftp : float = None):
 
+        # if no rest_ftp is specified, make it the default
+        if rest_ftp is None: rest_ftp = self.default_rest_ftp
         # add all blocks but the final one
         for i in range(sets - 1):
             self.add_interval_block(reps, effort_duration, effort_start_ftp, rest_duration, rest_start_ftp,
@@ -65,7 +74,7 @@ class Workout:
 
 
 
-    def add_wu_cd(self):
+    def add_10min_easy(self):
         # add a 10 min easy interval for warmup or cooldown
         self.add_interval(duration=10, start_ftp=50)
 
